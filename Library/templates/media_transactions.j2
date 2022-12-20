@@ -1,0 +1,285 @@
+<!--extending base template to this one and setting browser tab title-->
+{% extends 'base.j2' %}
+{% block title %} Media Transactions {% endblock %}
+<!--start of content to be placed into the base template-->
+{% block content %}
+
+<script type="application/javascript">
+	// Validate user inputs for the new media transaction
+  function validate_media_transaction(){
+    let patron_id = document.getElementById("patron_id");
+    let transaction_type = document.getElementById("transaction_type");
+    let employee_id = document.getElementById("employee_id");
+    let item_id = document.getElementById("item_id");
+
+    // if any fields are blank, alert the user and focus into the respective field
+    if (patron_id.value === ''){
+      window.alert('Please enter a Patron ID.');
+      patron_id.focus();
+      return false;
+    }
+
+    if (transaction_type.value === ""){
+      window.alert('Please select a Transaction Type.');
+      transaction_type.focus();
+      return false;
+    }
+
+    if (employee_id.value === ''){
+      window.alert('Please enter an Employee ID.');
+      employee_id.focus();
+      return false;
+    }
+
+    if (item_id.value === ''){
+      window.alert('Please enter an Item ID.');
+      item_id.focus();
+      return false;
+    }
+		// If valid, submit the form
+    document.forms['new_media_transaction'].submit();
+
+  }
+
+</script>
+<caption>
+	New Media Transaction
+</caption>
+<table>
+	<thead>
+		<tr>
+        <!--loop through headers and place them into the new media transaction table-->
+        <!--excluding transaction date, transaction id, patron id, and employee id-->
+        {% for dict in headers %}
+        {% for key in dict.keys() %}
+        {% if key != "Transaction Date" and key != "Transaction ID" 
+          and key != "Patron ID" and key != "Employee ID"%}
+          <th>{{ key }}</th>
+        {% endif %}
+        {% endfor %}
+        {% endfor %}
+			<th>Add Transaction</th>
+		</tr>
+	</thead>
+	<tbody>
+    <form
+      name="new_media_transaction"
+      action="{{ url_for('new_media_transaction') }}"
+      method="POST"
+    >
+    	<!--user input/select fields for new media transaction-->
+      <fieldset>
+        <tr>
+          <td>
+            <select style="width:80%;" id="patron_id" name="patron_id" title="Select Patron">
+              <option value="">-- Select Patron --</option>
+              {% for value in patron_ids %}
+                <option value="{{ value['Patron ID']}}"
+                >{{ value['Patron'] }}</option>
+              {% endfor %}
+            </select>
+          </td>
+          <td>
+            <select style="width:80%;" id="transaction_type" name="transaction_type" title="Select Transaction Type">
+              {% for type in transaction_types %}
+                <option value="{{type['Type']}}">{{type['Display']}}</option>
+              {% endfor %}
+            </select>
+          </td>
+          <td>
+            <select style="width:80%;" id="employee_id" name="employee_id" title="Select Employee">
+              <option value="">
+               -- Select Employee -- 
+               </option>
+              {% for value in employee_ids %}
+                <option value="{{ value['Employee ID']}}"
+                >{{ value['Employee'] }}</option>
+              {% endfor %}
+            </select>
+          </td>
+          <td>
+            <select style="width:80%;" id="item_id" name="item_id" title="Select Media Item">
+              <option value="">
+               -- Select Media Item -- 
+               </option>
+              {% for value in items %}
+                <option value="{{ value['Item ID']}}"
+                >{{ value['Item'] }}</option>
+              {% endfor %}
+            </select>
+          </td>
+          <td>
+            <input 
+              type="button" 
+              value="Add" 
+              id="add_transaction"
+              name="add_transaction"
+              title="Add New Transaction"
+              onclick="validate_media_transaction()"
+            />
+          </td>
+        </tr>
+      </fieldset>
+    </form>
+	</tbody>
+</table>
+<br />
+<caption>
+	Media Transaction Lookup
+</caption>
+<table>
+	<thead>
+		<tr>
+    <!--put headers into search table row excluding transaction id, 
+		patron id, and employee id-->
+      {% for dict in headers %}
+        {% for key in dict.keys() %}
+          {% if key != "Transaction ID" and key != "Patron ID" and 
+              key != "Employee ID"%}
+			      <th>{{ key }}</th>
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
+			<th>All History</th>
+			<th>Search</th>
+		</tr>
+	</thead>
+	<tbody>
+    <form
+      action="{{ url_for('media_transactions') }}"
+      method="POST"
+      >
+      <fieldset>
+        <tr>
+        	<!--add a row of search fields and a button to submit-->
+          <td>
+            <input
+              type="text"
+              id="transaction_patron_id_lookup"
+              name="transaction_patron_id_lookup"
+              title="Enter Patron Name Or ID To Search. E.g. %value, value%, %value%"
+            />
+          </td>
+          <td>
+          <select style="width:80%;" id="transaction_type_lookup" name="transaction_type_lookup" title="Select Transaction Type To Search">
+            {% for type in transaction_types %}
+              <option value="{{type['Type']}}">{{type['Display']}}</option>
+            {% endfor %}
+          </select>
+          </td>
+          <td>
+            <input
+              type="text"
+              id="transaction_employee_id_lookup"
+              name="transaction_employee_id_lookup"
+              title="Enter Employee Name Or ID To Search. E.g. %value, value%, %value%"
+            />
+          </td>
+          <td>
+            <input
+              type="text"
+              id="transaction_item_id_lookup"
+              name="transaction_item_id_lookup"
+              title="Enter Item Name Or ID To Search. E.g. %value, value%, %value%"
+            />
+          </td>
+          <td>
+            <input
+              type="date"
+              id="transaction_date_lookup"
+              name="transaction_date_lookup"
+              title="Select Date To Search"
+            />
+          </td>
+          <td>
+            <input type="checkbox" id="get_all_history" name="get_all_history" title="Unchecked Returns Current Checkouts. Checked Returns All History.">
+          </td>
+          <td>
+            <input type="button" value="Search" title="Search For Media Transactions" onclick="this.form.submit()"/>
+          </td>
+        </tr>
+      </fieldset>
+    </form>
+	</tbody>
+</table>
+<br />
+<caption>
+	Search Results
+</caption>
+<table>
+	<thead>
+		<tr>
+    	<!--make a row of headers in the search results table-->
+			{% for dict in headers %}
+        {% for key in dict.keys() %}
+          {% if key != "Patron ID" and key != "Employee ID"%}
+			      <th>{{ key }}</th>
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
+			<th>Edit</th>
+			<th>Delete</th>
+		</tr>
+	</thead>
+	<tbody>
+    <form>
+      <fieldset>
+      	<!--loop through search results and place into table-->
+        {% for result in search_results %}
+        <tr>
+          {% for key, value in result.items() %}
+              {% if key != "Patron ID" and key != "Employee ID" and key != "Item ID"%}
+					      <td>{{ value }}</td>
+              {% endif %}
+					{% endfor %}
+          <!--add custom edit button-->
+          <td>
+						<a
+							href="{{ url_for('edit_media_transaction', edit_id=result['Transaction ID']) }}"
+						>
+							<input id="edit_btn" type="button" value="Edit" title="Edit Transaction ID: {{result['Transaction ID']}}"/>
+						</a>
+					</td>
+          <!-- add custom delete button, disable when delete not allowed-->
+					<td>
+						<a
+							href="{{ url_for('delete_media_transaction', delete_id=result['Transaction ID']) }}"
+							onclick="return confirm(`Delete Transaction ID: {{ result['Transaction ID'] }}?`);"
+						>
+							<input id="delete_btn" type="button" value="Delete" title="Delete Transaction ID: {{result['Transaction ID']}}"/>
+						</a>
+					</td>
+        </tr>
+        {% endfor %}
+      </fieldset>
+    </form>
+	</tbody>
+</table>
+<!--show flashed message for when no results are found-->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+<br />
+{{ message }}
+<br />
+<!-- return button if no results are found -->
+<a href="{{ url_for('media_transactions') }}">
+    <input id="return_btn" type="button" class="return" value="Return" />
+</a>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<script>
+  $(document).ready(function(){
+    // Using select2 functions, imported from select2.org on 5/31/2022
+    $('#patron_id').select2();
+    $('#transaction_type').select2();
+    $('#transaction_type_lookup').select2();
+    $('#employee_id').select2();
+    $('#item_id').select2();
+  });
+  
+</script>
+
+{% endblock %}

@@ -1,0 +1,268 @@
+<!--extending base template to this one and setting browser tab title-->
+{% extends 'base.j2' %}
+{% block title %} Patrons {% endblock %}
+<!--start of content to be placed into the base template-->
+{% block content %}
+
+<script type="application/javascript">
+    // Validate user inputs for the new patron
+    function validate_new_patron() {
+        let first_name = document.getElementById('first_name');
+        let last_name = document.getElementById('last_name');
+        let phone_number = document.getElementById('phone_number');
+        let fine_amount = document.getElementById('fine_amount');
+        let address = document.getElementById('address');
+
+        // if any fields are blank and not nullable, alert the user and focus into the respective field
+        if (first_name.value === '') {
+            window.alert('Please enter a First Name.');
+            first_name.focus();
+            return false;
+        }
+
+        if (last_name.value === '') {
+            window.alert('Please enter a Last Name.');
+            last_name.focus();
+            return false;
+        }
+
+        let regex_pattern = /^\({1}[0-9]{3}\)\s[0-9]{3}[-]{1}[0-9]{4}$/;
+
+        if (
+            phone_number.value === '' ||
+            String(phone_number.value.match(regex_pattern)) !==
+            phone_number.value
+        ) {
+            window.alert('Please enter a valid Phone Number.');
+            phone_number.focus();
+            return false;
+        }
+
+        let regex_pattern_fine = /^(?:\d{0,17}(?:\.\d{2})?)$/;
+
+		if (
+			fine_amount.value !== '' &&
+			String(fine_amount.value.match(regex_pattern_fine)) !==
+			fine_amount.value
+		) {
+			window.alert('Please enter a valid Fine Amount.');
+			fine_amount.focus();
+			return false;
+		}
+
+        if (address.value === '') {
+            window.alert('Please enter an Address.');
+            address.focus();
+            return false;
+        }
+    	// If valid, submit the form
+        document.forms['new_patron'].submit();
+    }
+</script>
+
+<caption>
+    New Patron
+</caption>
+<table>
+    <thead>
+        <tr>
+        	<!-- loop through headers and place them into the new patrons table-->
+            {% for dict in headers %}
+            {% for key in dict.keys() %}
+            {% if key != "Patron ID" %}
+            <th>{{ key }}</th>
+            {% endif %}
+            {% endfor %}
+            {% endfor %}
+            <th>Add</th>
+        </tr>
+    </thead>
+    <tbody>
+        <form name="new_patron" action="{{ url_for('new_patron') }}" method="POST">
+            <!--user input fields for creating a new patron-->
+            <fieldset>
+                <tr>
+                    <td>
+                        <input type="text" id="first_name" name="first_name" title="Enter First Name"/>
+                    </td>
+                    <td>
+                        <input type="text" id="last_name" name="last_name" title="Enter Last Name"/>
+                    </td>
+                    <td>
+                        <input type="text" id="phone_number" name="phone_number"
+                                pattern="\([0-9]{3}\) [0-9]{3}-[0-9]{4}" title="Enter Phone Number. Format: (123) 456-7890"/>
+                    </td>
+                    <td>
+                        <input
+                            type="text" 
+                            id="fine_amount" 
+                            name="fine_amount"
+                            title="Enter Fine Amount Or Leave Blank"
+                            pattern="^(?:\d{0,17}(?:\.\d{2})?)$"/>
+                    </td>
+                    <td>
+                        <input type="text" id="address" name="address" title="Enter Address"/>
+                    </td>
+                    <td>
+                        <input id="add_patron" name="add_patron" type="button" value="Add"
+                            title="Add New Patron" onclick="validate_new_patron()" />
+                    </td>
+                </tr>
+            </fieldset>
+        </form>
+    </tbody>
+</table>
+<br />
+<caption>
+    Patron Lookup
+</caption>
+<table>
+    <thead>
+        <tr>
+        <!--put headers into search table row excluding address  
+		and fine amount-->
+            {% for dict in headers %} {% for key in dict.keys() %} {% if key !=
+            "Address" %} {% if key != "Fine Amount" %}
+            <th>{{ key }}</th>
+            {% endif %} {% endif %} {% endfor %} {% endfor %}
+            <th>Search</th>
+        </tr>
+    </thead>
+    <tbody>
+        <form action="{{ url_for('patrons') }}" method="POST">
+            <fieldset>
+                <tr>
+                	<!-- add a row of search fields and a button to submit-->
+                    <td>
+                        <input 
+                            type="text"
+                            id="patron_id_lookup"
+                            name="patron_id_lookup" 
+                            title="Enter Patron ID To Search. E.g. %value, value%, %value%"/>
+                    </td>
+                    <td>
+                        <input 
+                            type="text" 
+                            id="patron_first_name_lookup" 
+                            name="patron_first_name_lookup" 
+                            title="Enter Patron First Name To Search. E.g. %value, value%, %value%"/>
+                    </td>
+                    <td>
+                        <input 
+                            type="text" 
+                            id="patron_last_name_lookup" 
+                            name="patron_last_name_lookup" 
+                            title="Enter Patron Last Name To Search. E.g. %value, value%, %value%"/>
+                    </td>
+                    <td>
+                        <input
+                            type="text" 
+                            id="patron_phone_number_lookup" 
+                            name="patron_phone_number_lookup" 
+                            title="Enter Patron Phone Number To Search. E.g. %value, value%, %value%"/>
+                    </td>
+                    <td>
+                        <input
+                            type="button"
+                            value="Search" 
+                            onclick="this.form.submit()" 
+                            title="Search For Patrons"/>
+                    </td>
+                </tr>
+            </fieldset>
+        </form>
+    </tbody>
+</table>
+<br />
+<caption>
+    Search Results
+</caption>
+<br />
+<table>
+    <thead>
+        <tr>
+        <!--make a row of headers in the search results table-->
+            {% for dict in headers %}
+            {% for key in dict.keys() %}
+            <th>{{ key }}</th>
+            {% endfor %}
+            {% endfor %}
+            <th>Edit</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+        <form>
+            <fieldset>
+            	<!--loop through search results and place into table-->
+                {% for result in search_results %}
+                <tr>
+                    {% for key, value in result.items() %}
+                        {% if key == "Fine Amount" %}
+                            <!--if fine amount is not null, append $ to front-->
+				            {% if value %}
+              		            <td>${{ value }}</td>
+				            {% else %}
+					            <td>{{ value }}</td>
+				            {% endif %}
+                        {% else %}
+                            <td>{{ value }}</td>
+                        {% endif %}
+                    {% endfor %}
+                    <td>
+                    	<!--add custom edit button-->
+                        <a href="{{ url_for('edit_patron', edit_id=result['Patron ID']) }}">
+                            <input 
+                                id="edit_btn" 
+                                type="button" 
+                                value="Edit" 
+                                title="Edit '{{result['First Name']}} {{result['Last Name']}}'"/>
+                        </a>
+                    </td>
+                	<!-- add custom delete button, disable when delete not allowed-->
+                    <td>
+                    {% if result['Patron ID'] in prevent_delete %}
+                        <a href="{{ url_for('delete_patron', delete_id=result['Patron ID']) }}"
+                            onclick="">
+                            <input
+                                id="delete_btn"
+                                disabled 
+                                type="button" 
+                                value="Delete"
+                                title="Cannot Delete Patrons With Media Transactions"
+                            />
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('delete_patron', delete_id=result['Patron ID']) }}"
+                            onclick="return confirm('Delete {{result['First Name']}} {{result['Last Name']}}?')" >
+                            <input
+                                id="delete_btn" 
+                                type="button" 
+                                value="Delete"
+                                title="Delete '{{result['First Name']}} {{result['Last Name']}}'"
+                                />
+                        </a>
+                    {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </fieldset>
+        </form>
+    </tbody>
+</table>
+<!--show flashed message for when no results are found-->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+<br />
+{{ message }}
+<br />
+<!-- return button if no results are found -->
+<a href="{{ url_for('patrons') }}">
+    <input id="return_btn" type="button" class="return" value="Return" />
+</a>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+{% endblock %}

@@ -1,0 +1,144 @@
+<!--extend base template, create title, create content to put in base-->
+{% extends 'base.j2' %}
+{% block title %} Edit Employee {% endblock %}
+{% block content %}
+
+<script type="application/javascript">
+	// Validate employee edit fields are not not empty/null
+	function validate_edit() {
+		let first_name = document.getElementById('edit_employee_first_name');
+		let last_name = document.getElementById('edit_employee_last_name');
+		let phone_number = document.getElementById(
+			'edit_employee_phone_number'
+		);
+		let address = document.getElementById('edit_employee_address');
+
+		// if employee first name is blank make user enter a first name
+		if (first_name.value === '') {
+			window.alert('Please enter a First Name.');
+			first_name.focus();
+			return false;
+		}
+		// if employee last name is blank make user enter a last name
+		if (last_name.value === '') {
+			window.alert('Please enter a Last Name.');
+			last_name.focus();
+			return false;
+		}
+		// phone numbers must match regex
+		let regex_pattern = /^\({1}[0-9]{3}\)\s[0-9]{3}[-]{1}[0-9]{4}$/;
+		// if employee phone number does not match regex or is blank make user enter a valid phone number
+		if (
+			phone_number.value !== '' &&
+			String(phone_number.value.match(regex_pattern)) !==
+				phone_number.value
+		) {
+			window.alert('Please enter a valid Phone Number.');
+			phone_number.focus();
+			return false;
+		}
+		// if employee address is blank make user enter an address
+		if (address.value === '') {
+			window.alert('Please enter an Address.');
+			address.focus();
+			return false;
+		}
+
+		document.forms['edit_employee'].submit();
+	}
+</script>
+
+<caption>
+	Edit Employee
+</caption>
+<table>
+	<thead>
+	<!--loop through headers and place into table row-->
+		<tr>
+			{% for dict in headers %} 
+        	{% for key in dict.keys() %}
+			<th>{{ key }}</th>
+			{% endfor %}
+      		{% endfor %}
+			<th>Save</th>
+			<th>Cancel</th>
+		</tr>
+	</thead>
+	<tbody>
+	<!--put employee data into fields and create fields-->
+		{% for result in employee %}
+		<form
+			name="edit_employee"
+			action="{{ url_for('edit_employee', edit_id=result['Employee ID']) }}"
+			method="POST"
+		>
+			<fieldset>
+				<tr>
+					<td>
+						<input
+							type="text"
+							readonly="readonly"
+							id="edit_employee_id"
+							name="edit_employee_id"
+							title="Employee ID (Read Only)"
+							value="{{ result['Employee ID'] }}"
+						/>
+					</td>
+					<td>
+						<input
+							type="text"
+							id="edit_employee_first_name"
+							name="edit_employee_first_name"
+							title="Enter Employee First Name"
+							value="{{ result['First Name'] }}"
+						/>
+					</td>
+					<td>
+						<input
+							type="text"
+							id="edit_employee_last_name"
+							name="edit_employee_last_name"
+							title="Enter Employee Last Name"
+							value="{{ result['Last Name'] }}"
+						/>
+					</td>
+					<td>
+						<input
+							type="text"
+							id="edit_employee_phone_number"
+							name="edit_employee_phone_number"
+							title="Enter Employee Phone Number Or Leave Blank. Format: (123) 456-7890"
+							pattern="\([0-9]{3}\) [0-9]{3}-[0-9]{4}"
+							value="{{ result['Phone Number'] }}"
+						/>
+					</td>
+					<td>
+						<input
+							type="text"
+							id="edit_employee_address"
+							name="edit_employee_address"
+							title="Enter Employee Address"
+							value="{{ result['Address'] }}"
+						/>
+					</td>
+					<td>
+						<input
+							type="button"
+							value="Save"
+							title="Save Changes"
+							onclick="validate_edit()"
+						/>
+					</td>
+					<td>
+						<a href="{{ url_for('employees') }}">
+							<input type="button" value="Cancel" title="Cancel Edit"/>
+						</a>
+					</td>
+				</tr>
+			</fieldset>
+		</form>
+		{% endfor %}
+	</tbody>
+</table>
+
+{% endblock %}

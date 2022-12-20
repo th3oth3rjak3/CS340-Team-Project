@@ -1,0 +1,185 @@
+<!--extend base template, create title, create content to put in base-->
+{% extends 'base.j2' %}
+{% block title %}Edit Media Item{% endblock %}
+{% block content %}
+
+<script type="application/javascript">
+    // Validate media item edit fields are valid
+    function validate_media_item() {
+        let media_type = document.getElementById('media_type');
+        let supplier_id = document.getElementById('supplier_id');
+        let title = document.getElementById('title');
+        let creator_id = document.getElementById('creator_id');
+        let release_date = document.getElementById('release_date');
+        let replacement_cost = document.getElementById('replacement_cost');
+        let quantity_owned = document.getElementById('quantity_owned');
+        
+        // if media type is blank make user select a type
+        if (media_type.value === '') {
+            window.alert('Please select a Media Type.');
+            media_type.focus();
+            return false;
+        }
+
+        // if supplier id is not valid make user select valid supplier or none
+        let regex_supplier_id = /^\d+$/gm;
+
+        if (
+            supplier_id.value !== '' &&
+            String(supplier_id.value.match(regex_supplier_id)) !==
+            supplier_id.value
+        ) {
+            window.alert('Please enter a valid Supplier ID.');
+            supplier_id.focus();
+            return false;
+        }
+
+        // if media title is empty/null make user enter a title
+        if (title.value === '') {
+            window.alert('Please enter a Title.');
+            title.focus();
+            return false;
+        }
+
+        // if creator is empty/null make user enter a creator
+        if (creator_id.value === '') {
+            window.alert('Please enter a Creator ID.');
+            creator_id.focus();
+            return false;
+        }
+
+        // if release date is empty/null make user select a date
+        if (release_date.value === '') {
+            window.alert('Please enter a Release Date.');
+            release_date.focus();
+            return false;
+        }
+        // regex for replacement cost, adds commas and decimal as necessary ex. xxx,xxx.xx
+        let regex_replacement_cost = /^(?:\d{0,17}(?:\.\d{2})?)$/;
+        // make user enter valid replacement cost
+        if (
+            replacement_cost.value !== '' &&
+            String(replacement_cost.value.match(regex_replacement_cost)) !==
+            replacement_cost.value
+        ) {
+            window.alert('Please enter a valid Replacement Cost.');
+            replacement_cost.focus();
+            return false;
+        }
+
+        // if quantity owned is empty make user enter valid quantity
+        if (quantity_owned.value === '') {
+            window.alert('Please enter a Quantity Owned.');
+            quantity_owned.focus();
+            return false;
+        }
+        // regex for quantity ex. x,xxx, must be valid
+        let regex2 = /^[0-9]{1,}$/;
+        if (String(quantity_owned.value.match(regex2)) !== quantity_owned.value) {
+            window.alert('Please enter a valid Quantity Owned.');
+            quantity_owned.focus();
+            return false;
+        }
+        // if form is valid, submit
+        document.forms['edit_media_item'].submit();
+    }
+</script>
+
+<caption>
+    Edit Media Item
+</caption>
+<table>
+    <thead>
+    <!--loop through headers and place into table row-->
+        <tr>
+            {% for dict in headers %}
+            {% for key in dict.keys() %}
+            <th>{{ key }}</th>
+            {% endfor %}
+            {% endfor %}
+            <th>Save</th>
+            <th>Cancel</th>
+        </tr>
+    </thead>
+    <tbody>
+    <!--put media item data into fields and create fields-->
+    <!--ComboBoxes are used here for foreign key selection-->
+        {% for result in item %}
+        <form name="edit_media_item" action="{{ url_for('edit_media_item', edit_id=result['Item ID']) }}" method="POST">
+            <fieldset>
+                <tr>
+                    <td>
+                        <input type="text" id="item_id" name="item_id" readonly="readonly" title="Item ID (Read Only)"
+                            value="{{ result['Item ID'] }}">
+                    </td>
+                    <td>
+                        <select name="media_type" id="media_type" title="Select Media Type">
+                            {% for type in media_types %}
+                            <option value="{{ type['Media Type'] }}"
+                            {% if result['Media Type'] == type['Media Type']%} selected {% endif %}
+                            >{{ type['Display'] }}
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>
+                        <select value="{{ result['Supplier ID'] }}" name="supplier_id" id="supplier_id" title="Select Supplier Or Leave Blank">
+                            <option value="">-- Select Supplier --</option>
+                            {% for value in supp_ids %}
+                            <option value="{{ value['Supplier ID'] }}"
+                            {% if value['Supplier ID'] == result['Supplier ID'] %}
+                            selected
+                            {% endif %}>{{ value['Supplier'] }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>
+                        <input type="text" id="title" name="title" value="{{ result['Title'] }}" title="Enter Media Item Title"/>
+                    </td>
+                    <td>
+                        <select value="{{ result['Creator ID'] }}" name="creator_id" id="creator_id" title="Select Creator">
+                            <option value="">-- Select Creator --</option>
+                            {% for value in creator_ids %}
+                            <option value="{{ value['Creator ID'] }}"
+                            {% if value['Creator ID'] == result['Creator ID'] %}
+                            selected
+                            {% endif %}>{{ value['Creator'] }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>
+                        <input type="date" id="release_date" name="release_date" value="{{ result['Release Date'] }}" title="Enter Release Date"/>
+                    </td>
+                    <td>
+                        <input type="text" id="replacement_cost" name="replacement_cost" title="Enter Replacement Cost Or Leave Blank"
+                            pattern="^(?:\d{0,17}(?:\.\d{2})?)$" value="{{ result['Replacement Cost'] }}" />
+                        </div>
+                    </td>
+                    <td>
+                        <input type="text" id="quantity_owned" name="quantity_owned" title="Enter Quantity Owned"
+                            value="{{ result['Quantity Owned'] }}" />
+                    </td>
+                    <td>
+                        <input type="button" value="Save" id="save_item" name="save_item" title="Save Changes"
+                            onclick="validate_media_item()" />
+                    </td>
+                    <td>
+                        <a href="{{ url_for('media_items') }}">
+                            <input type="button" value="Cancel" title="Cancel Edit"/>
+                        </a>
+                    </td>
+                </tr>
+            </fieldset>
+        </form>
+        {% endfor %}
+    </tbody>
+</table>
+<script type="application/javascript">
+	$(document).ready(function(){
+        // Using select2 functions, imported from select2.org on 5/31/2022
+		$('#media_type').select2();
+		$('#supplier_id').select2();
+		$('#creator_id').select2();
+        
+	});
+</script>
+{% endblock %}

@@ -1,0 +1,86 @@
+<!--extend base template, create title, create content to put in base-->
+{% extends 'base.j2' %}
+{% block title %} Edit Creator {% endblock %} 
+{% block content %}
+
+<script type="application/javascript">
+	// Validate creator edit is not empty/null
+	function validate_edit() {
+		let full_name = document.getElementById('edit_creator_full_name');
+		// if creator name is blank make user enter a name
+		if (full_name.value === '') {
+			window.alert('Please enter a Name.');
+			full_name.focus();
+			return false;
+		}
+		// if form is valid, submit
+		document.forms['edit_creator'].submit();
+	}
+</script>
+
+<caption>
+	Edit Creator
+</caption>
+<table>
+	<thead>
+	<!--loop through headers and place into table row-->
+		<tr>
+			{% for dict in headers %}
+        	{% for key in dict.keys() %}
+			<th>{{ key }}</th>
+			{% endfor %}
+      		{% endfor %}
+			<th>Save</th>
+			<th>Cancel</th>
+		</tr>
+	</thead>
+	<tbody>
+	<!--put creator data into fields and create fields-->
+		{% for result in creator %}
+		<form
+			name="edit_creator"
+			action="{{ url_for('edit_creator', edit_id=result['Creator ID']) }}"
+			method="POST"
+		>
+			<fieldset>
+				<tr>
+					<td>
+						<input
+							type="text"
+							readonly="readonly"
+							id="edit_creator_id"
+							name="edit_creator_id"
+              				title="Creator ID (Read Only)"
+							value="{{ result['Creator ID'] }}"
+						/>
+					</td>
+					<td>
+						<input
+							type="text"
+							id="edit_creator_full_name"
+							name="edit_creator_full_name"
+              				title="Enter Creator Name"
+							value="{{ result['Creator'] }}"
+						/>
+					</td>
+					<td>
+						<input
+							type="button"
+							value="Save"
+              				title="Save Changes"
+							onclick="validate_edit()"
+						/>
+					</td>
+					<td>
+						<a href="{{ url_for('creators') }}">
+							<input type="button" value="Cancel" title="Cancel Edit"/>
+						</a>
+					</td>
+				</tr>
+			</fieldset>
+		</form>
+		{% endfor %}
+	</tbody>
+</table>
+
+{% endblock %}

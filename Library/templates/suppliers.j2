@@ -1,0 +1,191 @@
+<!--extending base template to this one and setting browser tab title-->
+{% extends 'base.j2' %}
+{% block title %} Suppliers {% endblock %}
+<!--start of content to be placed into the base template-->
+{% block content %}
+
+<script type="application/javascript">
+	// Validate user inputs for the new supplier
+	function validate_new_supplier() {
+		let supplier_name = document.getElementById('supplier_name');
+		let phone_number = document.getElementById('phone_number');
+		let supplier_address = document.getElementById('supplier_address');
+
+		// if any fields are blank alert the user and focus into the respective field
+		if (supplier_name.value === '') {
+			window.alert('Please enter a First Name.');
+			name.focus();
+			return false;
+		}
+
+		if (supplier_address.value === '') {
+			window.alert('Please enter an Address.');
+			address.focus();
+			return false;
+		}
+
+		let regex_pattern = /^\({1}[0-9]{3}\)\s[0-9]{3}[-]{1}[0-9]{4}$/;
+
+		if (
+			phone_number.value === '' ||
+			String(phone_number.value.match(regex_pattern)) !==
+			phone_number.value
+		) {
+			window.alert('Please enter a valid Phone Number.');
+			phone_number.focus();
+			return false;
+		}
+		// If valid, submit the form
+		document.forms['new_supplier'].submit();
+	}
+</script>
+
+<caption>
+	New Supplier
+</caption>
+<table>
+	<thead>
+		<tr>
+			<!-- loop through headers and place them into the new supplier table-->
+			{% for dict in headers %}
+			{% for key in dict.keys() %}
+			{% if key != "Supplier ID" %}
+			<th>{{ key }}</th>
+			{% endif %}
+			{% endfor %}
+			{% endfor %}
+			<th>Add</th>
+		</tr>
+	</thead>
+	<tbody>
+		<form name="new_supplier" action="{{ url_for('new_supplier') }}" method="POST">
+			<!--user input fields for creating a new supplier-->
+			<fieldset>
+				<tr>
+					<td>
+						<input type="text" id="supplier_name" name="supplier_name" title="Enter Supplier Name"/>
+					</td>
+					<td>
+						<input type="text" id="supplier_address" name="supplier_address" title="Enter Supplier Address"/>
+					</td>
+					<td>
+						<input type="text" id="phone_number" name="phone_number"
+							pattern="\([0-9]{3}\) [0-9]{3}-[0-9]{4}" title="Enter Phone Number. Format: (123) 456-7890"/>
+					</td>
+					<td>
+						<input id="add_supplier" name="add_supplier" title="Add New Supplier" type="button" value="Add"
+							onclick="validate_new_supplier()" />
+					</td>
+				</tr>
+			</fieldset>
+		</form>
+	</tbody>
+</table>
+<br />
+<caption>
+	Supplier Lookup
+</caption>
+<table>
+	<thead>
+		<tr>
+			<!--put headers into search table row excluding address-->
+			{% for dict in headers %}
+			{% for key in dict.keys() %}
+			{% if key != "Address" %}
+			<th>{{ key }}</th>
+			{% endif %}
+			{% endfor %}
+			{% endfor %}
+			<th>Search</th>
+		</tr>
+	</thead>
+	<tbody>
+		<form action="{{ url_for('suppliers') }}" method="POST">
+			<fieldset>
+				<tr>
+				<!-- add a row of search fields and a button to submit-->
+					<td>
+						<input type="text" id="supplier_id_lookup" name="supplier_id_lookup" 
+              title="Enter Supplier ID To Search. E.g. %value, value%, %value%"/>
+					</td>
+					<td>
+						<input type="text" id="supplier_name_lookup" name="supplier_name_lookup" 
+              title="Enter Supplier Name To Search. E.g. %value, value%, %value%"/>
+					</td>
+					<td>
+						<input 
+              type="text" 
+              id="supplier_phone_number_lookup" 
+              name="supplier_phone_number_lookup" 
+              title="Enter Supplier Phone Number To Search. E.g. %value, value%, %value%"/>
+					</td>
+					<td>
+						<input type="button" value="Search" title="Search For Suppliers" onclick="this.form.submit()" />
+					</td>
+				</tr>
+			</fieldset>
+		</form>
+	</tbody>
+</table>
+<br />
+<caption>
+	Search Results
+</caption>
+<br />
+<table>
+	<thead>
+		<tr>
+			<!--make a row of headers in the search results table-->
+			{% for dict in headers %}
+			{% for key in dict.keys() %}
+			<th>{{ key }}</th>
+			{% endfor %}
+			{% endfor %}
+			<th>Edit</th>
+			<th>Delete</th>
+		</tr>
+	</thead>
+	<tbody>
+		<form>
+			<fieldset>
+				<!--loop through search results and place into table-->
+				{% for result in search_results %}
+				<tr>
+					{% for key, value in result.items() %}
+						<td>{{ value }}</td>
+					{% endfor %}
+					<!--add custom edit button-->
+					<td>
+						<a href="{{ url_for('edit_supplier', edit_id=result['Supplier ID']) }}">
+							<input id="edit_btn" type="button" value="Edit" title="Edit '{{result['Name']}}'" />
+						</a>
+					</td>
+					<td>
+						<!-- add custom delete button, disable when delete not allowed-->
+						<a href="{{ url_for('delete_supplier', delete_id=result['Supplier ID']) }}"
+							onclick="return confirm('Delete {{result['Name']}}?');">
+							<input id="delete_btn" type="button" title="Delete '{{result['Name']}}'" value="Delete" />
+						</a>
+					</td>
+				</tr>
+				{% endfor %}
+			</fieldset>
+		</form>
+	</tbody>
+</table>
+<!--show flashed message for when no results are found-->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+<br />
+{{ message }}
+<br />
+<!-- return button if no results are found -->
+<a href="{{ url_for('suppliers') }}">
+    <input id="return_btn" type="button" class="return" value="Return" />
+</a>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+{% endblock %}

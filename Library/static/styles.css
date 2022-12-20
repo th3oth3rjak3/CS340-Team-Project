@@ -1,0 +1,279 @@
+/*   ----- Imports  -----  */
+@import url('https://fonts.googleapis.com/css2?family=Zen+Kurenaido&display=swap');
+
+/*   ----- Variables  -----  */
+:root {
+	--specialGray: #282c34;
+    --niceBlue: #61dafb;
+    --lightGray: #bac0c2;
+    --lighterGray: #f1f1f1;
+    --buttonColor: #fbfeff;
+	color: black;
+	background-color: white;
+	font-family: 'Zen Kurenaido', sans-serif;
+    font-size: 100%;
+}
+
+img{
+    padding: 5px;
+    margin: 5px;
+}
+
+body {
+	color: black;
+	background-color: white;
+	font-family: 'Zen Kurenaido', sans-serif;
+	margin: auto;
+}
+
+
+
+/* ----- Anchors ----- Text links */
+nav a {
+	color: var(--niceBlue);
+	background-color: var(--specialGray);
+	padding: 1px;
+	margin: 5px;
+	font-size: 18px;
+	text-decoration: none;
+	font-family: 'Zen Kurenaido', sans-serif;
+}
+
+nav a:hover {
+	color: #37788b;
+}
+
+/*  ----- Page layout blocks -----  */
+
+
+/*  -----  Typography  ----- */
+p {
+	font-family: 'Zen Kurenaido', sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-family: 'Zen Kurenaido', sans-serif;
+	margin: auto;
+    text-align: center;
+}
+
+/*  ----- Table ----- */
+caption {
+	background-color: var(--specialGray);
+	color: white;
+    font-weight: bold;
+}
+
+table {
+	border: 2px solid var(--specialGray);
+	width: 85%;
+	border-collapse: collapse;
+	margin-left: auto;
+	margin-right: auto;
+    padding: 0px;
+}
+
+tr th {
+	border: 2px solid var(--specialGray);
+    background-color: var(--lightGray);
+    padding: 0px;
+    font-size: 20px;
+    width: fit-content;
+}
+
+tr td {
+	border: 1px solid var(--specialGray);
+    background-color:var(--lighterGray);
+    padding: 0px;
+    font-size: 14px;
+    width: auto;
+}
+
+/*  ----- Form ----- */
+form {
+	display: block;
+	width: auto;
+	
+}
+
+fieldset {
+	font-family: 'Zen Kurenaido', sans-serif;
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+
+legend {
+	font-family: 'Zen Kurenaido', sans-serif;
+    background-color: var(--specialGray);
+    border: 1px solid var(--specialGray);
+    font-weight: bold;
+    color: white;
+}
+
+label {
+	font-family: 'Zen Kurenaido', sans-serif;
+    background-color:var(--lighterGray);
+    font-weight: bold;
+    
+}
+input {
+    font-family: 'Zen Kurenaido', sans-serif;
+}
+
+input[type=date]{
+    font-family: 'Zen Kurenaido', sans-serif;
+    background-color: white;
+    font-size: 14px;
+    width: 80%;
+    border-radius: 4px;
+    border: 1px solid black;
+    text-align: center;
+}
+
+input[type=text] {
+	font-family: 'Zen Kurenaido', sans-serif;
+    background-color: white;
+    font-size: 14px;
+    width: 80%;
+    height: auto;
+    border-radius: 4px;
+    border: 1px solid black;
+    text-align: center;
+    padding: 3px;
+}
+
+input[type=button]{
+    font-family: 'Zen Kurenaido', sans-serif;
+    background-color: var(--buttonColor);
+    width: 80%;
+    margin: 5px;
+    border-radius: 3px;
+}
+
+input[type=button]:hover {
+    background-color: gainsboro;
+}
+
+
+input:invalid {
+    border: red solid 3px;
+    position: relative;
+    display: inline-block;
+  }
+
+select {
+    font-family: 'Zen Kurenaido', sans-serif;
+    background-color: var(--lighterGray);
+    margin: 5px;
+    width: 80%;
+
+    border-color: black;
+    border-radius: 3px;
+}
+
+button {
+	font-family: 'Zen Kurenaido', sans-serif;
+    background-color:var(--buttonColor);
+    cursor: pointer;
+    padding-left: 10%;
+    padding-right: 10%;
+	margin-bottom: 2px;
+}
+
+input[type=button].return {
+    font-family: 'Zen Kurenaido', sans-serif;
+    background-color: var(--lighterGray);
+    margin: 20px;
+    width: 8%;
+    border-radius: 3px;
+}
+
+.fixed-header{
+    position: absolute;
+	top: 5px;
+    left: 5px;
+    right: 5px;
+    height: 125px;
+    overflow: hidden;
+	background-color: var(--specialGray);
+	color: white;
+	margin: auto;
+}
+.fixed-main{
+    top: 130px;
+    bottom: 45px;
+    position: fixed;
+    overflow: auto;
+    width: 100%;
+    text-align: center;
+}
+.fixed-footer{
+	position: absolute;
+	bottom: 5px;
+    left: 5px;
+    right: 5px;
+    height: 40px;
+    overflow: hidden;
+	background-color: var(--specialGray);
+	color: white;
+	margin: auto;
+}
+.body-container{
+    width: 80%;
+    margin: auto;
+    font-size: 25px;
+
+}
+.header-container{
+    width: 80%;
+    margin: 10px auto;
+    text-align: center;
+}
+.header-container{
+    width: 80%;
+    margin: 10px auto;
+    text-align: center;
+    font-size: 30px;
+}
+.footer-container{
+    width: 80%;
+    margin: 0 auto;
+    text-align: center;
+    font-size: 20px;
+}
+
+/* Tooltip container */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    font-size: 18px;
+    width: 100%;
+  }
+  
+  /* Tooltip text */
+  .tooltip .tooltiptext {
+    visibility: hidden;
+    width: 300px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 3px;
+   
+    /* Position the tooltip text */
+    position: absolute;
+    z-index: 1;
+  }
+  
+  /* Show the tooltip text when you mouse over the tooltip container */
+  .tooltip:hover .tooltiptext {
+    visibility: visible;
+    transition-delay: 1s;
+  }
+

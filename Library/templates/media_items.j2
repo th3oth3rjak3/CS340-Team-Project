@@ -1,0 +1,340 @@
+<!--extending base template to this one and setting browser tab title-->
+{% extends 'base.j2' %}
+{% block title %} Media Items {% endblock %}
+<!--start of content to be placed into the base template-->
+{% block content %}
+
+<script type="application/javascript">
+	// Validate user inputs for the new media item
+	function validate_media_item() {
+		let media_type = document.getElementById('media_type');
+		let supplier_id = document.getElementById('supplier_id');
+		let title = document.getElementById('title');
+		let creator_id = document.getElementById('creator_id');
+		let release_date = document.getElementById('release_date');
+		let replacement_cost = document.getElementById('replacement_cost');
+		let quantity_owned = document.getElementById('quantity_owned');
+
+		// if any fields are blank and not nullable, alert the user and focus into the respective field
+		if (media_type.value === '') {
+			window.alert('Please select a Media Type.');
+			media_type.focus();
+			return false;
+		}
+
+		if (title.value === '') {
+			window.alert('Please enter a Title.');
+			title.focus();
+			return false;
+		}
+
+		if (creator_id.value === '') {
+			window.alert('Please select a Creator.');
+			creator_id.focus();
+			return false;
+		}
+
+		if (release_date.value === '') {
+			window.alert('Please enter a Release Date.');
+			release_date.focus();
+			return false;
+		}
+
+    regex1 = /^(?:\d{0,17}(?:\.\d{2})?)$/;
+    if (replacement_cost !== ''){
+      if (String(replacement_cost.value.match(regex1)) !== replacement_cost.value){
+        window.alert('Please enter a valid Replacement Cost.');
+        replacement_cost.focus();
+        return false;
+      }
+    }
+
+		if (quantity_owned.value === '') {
+			window.alert('Please enter a Quantity Owned.');
+			quantity_owned.focus();
+			return false;
+		}
+
+    let regex2 = /^[0-9]{1,}$/;
+    if (String(quantity_owned.value.match(regex2)) !== quantity_owned.value){
+      window.alert('Please enter a valid Quantity Owned.');
+      quantity_owned.focus();
+      return false;
+    }
+		// If valid, submit the form
+		document.forms['new_media_item'].submit();
+	}
+</script>
+<caption>
+	New Media Item
+</caption>
+<table>
+	<thead>
+		<tr>
+			<!-- loop through headers and place them into the new media item table-->
+			{% for dict in headers %}
+        	{% for key in dict.keys() %}
+          	{% if key != "Item ID" %}
+			<th>{{ key }}</th>
+			{% endif %}
+        	{% endfor %}
+      		{% endfor %}
+			<th>Add</th>
+		</tr>
+	</thead>
+	<tbody>
+		<form
+			name="new_media_item"
+			action="{{ url_for('new_media_item') }}"
+			method="POST"
+		>
+		<!--user input/select fields for new media item-->
+			<fieldset>
+				<tr>
+					<td>
+						<select style="width:80%;" id="media_type" name="media_type" title="Select Media Type">
+							{% for type in media_types %}
+                <option value="{{ type['Media Type'] }}">{{ type['Display'] }}</option>
+              {% endfor %}
+						</select>
+					</td>
+					<td>
+						<select style="width:80%;" id="supplier_id" name="supplier_id" title="Select Supplier Or Leave Blank">
+                            <option value="">-- Select Supplier --</option>
+                            {% for value in supp_ids %}
+                            <option value="{{ value['Supplier ID'] }}"
+                            >{{ value['Supplier'] }}</option>
+                            {% endfor %}
+                        </select>
+					</td>
+					<td>
+						<input type="text" id="title" name="title" value="" title="Enter Media Item Title"/>
+					</td>
+					<td>
+						<select style="width:80%;" id="creator_id" name="creator_id" title="Select Creator">
+							<option value="">-- Select Creator --</option>
+                            {% for value in creator_ids %}
+                            <option value="{{ value['Creator ID'] }}"
+                            >{{ value['Creator'] }}</option>
+                            {% endfor %}
+                        </select>
+					</td>
+					<td>
+						<input
+							type="date"
+							id="release_date"
+							name="release_date"
+							title="Enter Release Date"
+						/>
+					</td>
+					<td>
+						<input
+							type="text"
+							id="replacement_cost"
+							name="replacement_cost"
+							title="Enter Replacement Cost Or Leave Blank"
+              pattern="^(?:\d{0,17}(?:\.\d{2})?)$"
+						/>
+					</td>
+					<td>
+						<input
+							type="text"
+							id="quantity_owned"
+							name="quantity_owned"
+							title="Enter Quantity Owned"
+						/>
+					</td>
+					<td>
+						<input
+							type="button"
+							value="Add"
+							id="add_item"
+							name="add_item"
+							title="Add New Media Item"
+							onclick="validate_media_item()"
+						/>
+					</td>
+				</tr>
+			</fieldset>
+		</form>
+	</tbody>
+</table>
+<br />
+<caption>
+	Media Item Lookup
+</caption>
+<table>
+	<thead>
+		<tr>
+		<!--put headers into search table row excluding release date, 
+		replacement cost, and quantity-->
+			{% for dict in headers %}
+        {% for key in dict.keys() %}
+          {% if key != "Release Date" %}
+            {% if key != "Replacement Cost" %}
+              {% if key != "Quantity Owned" %}
+			          <th>{{ key }}</th>
+			        {% endif %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
+			<th>Search</th>
+		</tr>
+	</thead>
+	<tbody>
+    <form
+      action="{{ url_for('media_items') }}"
+      method="POST"
+    >
+      <fieldset>
+        <tr>
+		<!-- add a row of search fields and a button to submit-->
+          <td>
+            <input
+              type="text"
+              id="media_item_id_lookup"
+              name="media_item_id_lookup"
+			        title="Enter Item ID To Search. E.g. %value, value%, %value%"
+            />
+          </td>
+          <td>
+            <select style="width:80%;" id="media_type_lookup" name="media_type_lookup" title="Select Media Type To Search Or Leave Blank">
+              {% for type in media_types %}
+                <option value="{{ type['Media Type'] }}">{{ type['Display'] }}</option>
+              {% endfor %}
+            </select>
+          </td>
+          <td>
+            <input
+              type="text"
+              id="media_supplier_id_lookup"
+              name="media_supplier_id_lookup"
+			  title="Enter Supplier Name Or Supplier ID To Search. E.g. %value, value%, %value%"
+            />
+          </td>
+          <td>
+            <input 
+              type="text" 
+              id="title_lookup" 
+              name="title_lookup" 
+              title="Enter Title To Search. E.g. %value, value%, %value%" />
+          </td>
+          <td>
+            <input
+              type="text"
+              id="media_creator_id_lookup"
+              name="media_creator_id_lookup"
+			        title="Enter Creator Name Or Creator ID To Search. E.g. %value, value%, %value%"
+            />
+          </td>
+          <td>
+            <input type="button" title="Search For Media Items" value="Search" onclick="this.form.submit()"/>
+          </td>
+        </tr>
+      </fieldset>
+    </form>
+	</tbody>
+</table>
+<br />
+<caption>
+	Search Results
+</caption>
+<table>
+	<thead>
+		<tr>
+			<!--make a row of headers in the search results table-->
+			{% for dict in headers %}
+        	{% for key in dict.keys() %}
+			<th>{{ key }}</th>
+        	{% endfor %}
+      		{% endfor %}
+			<th>Edit</th>
+			<th>Delete</th>
+		</tr>
+	</thead>
+	<tbody>
+    <form>
+      <fieldset>
+	  	<!--loop through search results and place into table-->
+        {% for result in search_results %}
+        <tr>
+          {% for key, value in result.items() %}
+            {% if key == "Replacement Cost" %}
+				<!--if replacement cost is not null, append $ to front-->
+				{% if value %}
+              		<td>${{ value }}</td>
+				{% else %}
+					<td>{{ value }}</td>
+				{% endif %}
+            {% else %}
+				<!--exclude creator id and supplier id-->
+				{% if key != "Creator ID" and key != "Supplier ID"%}
+              		<td>{{ value }}</td>
+				{% endif %}
+            {% endif %}
+          {% endfor %}
+			<!--add custom edit button-->
+          <td>
+						<a
+							href="{{ url_for('edit_media_item', edit_id=result['Item ID']) }}"
+						>
+							<input id="edit_btn" type="button" value="Edit" title="Edit '{{ result['Title'] }}'" />
+						</a>
+					</td>
+					<td>
+			<!-- add custom delete button, disable when delete not allowed-->
+            {% if result['Item ID'] in prevent_delete %}
+              <a
+                href="{{ url_for('delete_media_item', delete_id=result['Item ID']) }}"
+                onclick=""
+              >
+                <input 
+                  id="delete_btn" 
+                  disabled 
+                  type="button" 
+                  value="Delete" 
+                  title="Cannot Delete Media Items Involved In Transactions"
+                />
+              </a>
+            {% else %}
+              <a
+                href="{{ url_for('delete_media_item', delete_id=result['Item ID']) }}"
+                onclick="return confirm(`Delete '{{ result['Title'] }}'?`);"
+              >
+                <input id="delete_btn" type="button" value="Delete" title="Delete '{{ result['Title'] }}'"/>
+              </a>
+            {% endif %}
+					</td>
+          {% endfor %}
+        </tr>
+      </fieldset>
+    </form>
+	</tbody>
+</table>
+<!--show flashed message for when no results are found-->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+<br />
+{{ message }}
+<br />
+<!-- return button if no results are found -->
+<a href="{{ url_for('media_items') }}">
+    <input id="return_btn" type="button" class="return" value="Return" />
+</a>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<script>
+	$(document).ready(function(){
+		// Using select2 functions, imported from select2.org on 5/31/2022
+		$('#media_type').select2();
+		$('#supplier_id').select2();
+		$('#media_type_lookup').select2();
+		$('#creator_id').select2();
+	});
+</script>
+
+{% endblock %}

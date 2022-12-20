@@ -1,0 +1,158 @@
+<!--extend base template, create title, create content to put in base-->
+{% extends 'base.j2' %}
+{% block title %}Edit Media Transactions{% endblock%}
+{% block content %}
+
+<script type="application/javascript">
+  // Validate media transaction edit is valid
+	function validate_edit(){
+    let patron_id = document.getElementById("edit_patron_id");
+    let transaction_type = document.getElementById("edit_transaction_type");
+    let employee_id = document.getElementById("edit_employee_id");
+    let item_id = document.getElementById("edit_item_id");
+    // if patron is null make user select a patron
+    if (patron_id.value === ''){
+      window.alert('Please enter a Patron ID.');
+      patron_id.focus();
+      return false;
+    }
+    // if transaction type is null make user select a type
+    if (transaction_type.value === ''){
+      window.alert('Please select a Transaction Type.');
+      transaction_type.focus();
+      return false;
+    }
+    // if employee is null make user select an employee
+    if (employee_id.value === ''){
+      window.alert('Please enter an Employee ID.');
+      employee_id.focus();
+      return false;
+    }
+    // if meda item is null make user select an item
+    if (item_id.value === ''){
+      window.alert('Please enter an Item ID.');
+      item_id.focus();
+      return false;
+    }
+    // if form is valid, submit
+    document.forms['edit_transaction'].submit();
+
+  }
+</script>
+
+<caption>
+	Edit Media Transaction
+</caption>
+<table>
+	<thead>
+		<tr>
+    <!--loop through headers and place into table row, excluding Patron ID and Employee ID-->
+			{% for dict in headers %}
+      {% for key in dict.keys() %}
+      {% if key != "Patron ID" and key != "Employee ID"%}
+			<th>{{ key }}</th>
+      {% endif %}
+			{% endfor %}
+      {% endfor %}
+			<th>Save</th>
+			<th>Cancel</th>
+		</tr>
+	</thead>
+	<tbody>
+  <!--put transaction data into fields and create fields-->
+  <!--ComboBoxes used here for foreign keys selection-->
+		{% for result in transaction %}
+		<form
+			name="edit_transaction"
+			action="{{ url_for('edit_media_transaction', edit_id=result['Transaction ID']) }}"
+			method="POST"
+		>
+			<fieldset>
+				<tr>
+					<td>
+						<input
+							type="text"
+							readonly="readonly"
+							id="edit_transaction_id"
+							name="edit_transaction_id"
+              title="Transaction ID (Read Only)"
+							value="{{ result['Transaction ID'] }}"
+						/>
+					</td>
+					<td>
+            <select style="width:80%;" id="edit_patron_id" name="edit_patron_id" title="Select Patron">
+              <option value="">-- Select Patron --</option>
+              {% for value in patron_ids %}
+              <option {% if value['Patron ID'] == result['Patron ID'] %} selected {% endif %}
+              value="{{ value['Patron ID']}}">{{ value['Patron'] }}</option>
+              {% endfor %}
+            </select>
+					</td>
+					<td>
+            <select name="edit_transaction_type" id="edit_transaction_type" title="Select Transaction Type">
+              {% for type in transaction_types %}
+              <option{% if type['Type'] == result['Transaction Type'] %} selected {% endif %}
+              value="{{type['Type']}}">{{type['Display']}}</option>
+              {% endfor %}
+            </select>
+					</td>
+          <td>
+            <select style="width:80%;" id="edit_employee_id" name="edit_employee_id" title="Select Employee">
+              <option value="">
+               -- Select Employee -- 
+               </option>
+              {% for value in employee_ids %}
+              <option{% if value['Employee ID'] == result['Employee ID'] %} selected {% endif %}
+              value="{{ value['Employee ID']}}">{{ value['Employee'] }}</option>
+              {% endfor %}
+            </select>
+					</td>
+          <td>
+            <select style="width:80%;" id="edit_item_id" name="edit_item_id" title="Select Media Item">
+              <option value="">-- Select Media Item --</option>
+              {% for value in items %}
+              <option {% if value['Item ID'] == result['Item ID']%} selected {% endif %}
+              value="{{ value['Item ID']}}">{{ value['Item'] }}</option>
+              {% endfor %}
+            </select>
+					</td>
+          <td>
+						<input
+							type="text"
+              readonly="readonly"
+							id="edit_transaction_date"
+							name="edit_transaction_date"
+              title="Transaction Date (Read Only)"
+							value="{{ result['Transaction Date'] }}"
+						/>
+					</td>
+					<td>
+						<input
+							type="button"
+							value="Save"
+              title="Save Changes"
+							onclick="validate_edit()"
+						/>
+					</td>
+					<td>
+						<a href="{{ url_for('media_transactions') }}">
+							<input type="button" title="Cancel Edit" value="Cancel" />
+						</a>
+					</td>
+				</tr>
+			</fieldset>
+		</form>
+		{% endfor %}
+	</tbody>
+</table>
+<script>
+  $(document).ready(function(){
+    // Using select2 functions, imported from select2.org on 5/31/2022
+    $('#edit_transaction_type').select2();
+    $('#edit_employee_id').select2();
+    $('#edit_patron_id').select2();
+    $('#edit_item_id').select2();
+  });
+  
+</script>
+{% endblock %}

@@ -1,0 +1,150 @@
+<!--extend base template, create title, create content to put in base-->
+{% extends 'base.j2' %}
+{% block title %} Edit Patron {% endblock %}
+{% block content %}
+
+<script type="application/javascript">
+	// Validate patron edit is not empty/null
+	function validate_edit() {
+		let first_name = document.getElementById('edit_patron_first_name');
+		let last_name = document.getElementById('edit_patron_last_name');
+		let phone_number = document.getElementById(
+			'edit_patron_phone_number'
+		);
+		let fine_amount = document.getElementById('edit_patron_fine_amount');
+		let address = document.getElementById('edit_patron_address');
+		// if patron first name is empty/null make user enter a first name
+		if (first_name.value === '') {
+			window.alert('Please enter a First Name.');
+			first_name.focus();
+			return false;
+		}
+		// if patron last name is empty/null make user enter a last name
+		if (last_name.value === '') {
+			window.alert('Please enter a Last Name.');
+			last_name.focus();
+			return false;
+		}
+
+		let regex_pattern = /^\({1}[0-9]{3}\)\s[0-9]{3}[-]{1}[0-9]{4}$/;
+		// if patron phone number is not valid/is empty make user enter a valid number
+		if (
+			phone_number.value === '' ||
+			String(phone_number.value.match(regex_pattern)) !==
+			phone_number.value
+		) {
+			window.alert('Please enter a valid Phone Number.');
+			phone_number.focus();
+			return false;
+		}
+
+		let regex_pattern_fine = /^(?:\d{0,17}(?:\.\d{2})?)$/;
+		// if fine amount is not valid make user enter a fine amount, can be null
+		if (
+			fine_amount.value !== '' &&
+			String(fine_amount.value.match(regex_pattern_fine)) !==
+			fine_amount.value
+		) {
+			window.alert('Please enter a valid Fine Amount.');
+			fine_amount.focus();
+			return false;
+		}
+		// if address is empty/null make user enter an address
+		if (address.value === '') {
+			window.alert('Please enter an Address.');
+			address.focus();
+			return false;
+		}
+		// if form is valid, submit
+		document.forms['edit_patron'].submit();
+	}
+</script>
+
+<caption>
+	Edit Patron
+</caption>
+<table>
+	<thead>
+		<tr>
+		<!--loop through headers and place into table row-->
+			{% for dict in headers %}
+			{% for key in dict.keys() %}
+			<th>{{ key }}</th>
+			{% endfor %}
+			{% endfor %}
+			<th>Save</th>
+			<th>Cancel</th>
+		</tr>
+	</thead>
+	<tbody>
+	<!--put patron data into fields and create fields-->
+		{% for result in patron %}
+		<form name="edit_patron" action="{{ url_for('edit_patron', edit_id=result['Patron ID']) }}" method="POST">
+			<fieldset>
+				<tr>
+					<td>
+						<input type="text" 
+							readonly="readonly" 
+							id="edit_patron_id" 
+							name="edit_patron_id"
+							title="Patron ID (Read Only)"
+							value="{{ result['Patron ID'] }}" />
+					</td>
+					<td>
+						<input
+							type="text"
+							id="edit_patron_first_name"
+							name="edit_patron_first_name"
+							title="Enter Patron First Name"
+							value="{{ result['First Name'] }}" />
+					</td>
+					<td>
+						<input 
+							type="text" 
+							id="edit_patron_last_name" 
+							name="edit_patron_last_name"
+							title="Enter Patron Last Name"
+							value="{{ result['Last Name'] }}" />
+					</td>
+					<td>
+						<input
+							type="text" 
+							id="edit_patron_phone_number" 
+							name="edit_patron_phone_number"
+							title="Enter Patron Phone Number. Format: (123) 456-7890"
+							pattern="\([0-9]{3}\) [0-9]{3}-[0-9]{4}" 
+							value="{{ result['Phone Number'] }}" />
+					</td>
+					<td>
+						<input 
+							type="text" 
+							id="edit_patron_fine_amount" 
+							name="edit_patron_fine_amount"
+							title="Enter Fine Amount Or Leave Blank"
+							pattern="^(?:\d{0,17}(?:\.\d{2})?)$" 
+							value="{{ result['Fine Amount'] }}" />
+					</td>
+					<td>
+						<input 
+							type="text" 
+							id="edit_patron_address" 
+							name="edit_patron_address"
+							title="Enter Patron Address"
+							value="{{ result['Address'] }}" />
+					</td>
+					<td>
+						<input type="button" value="Save" title="Save Changes" onclick="validate_edit()" />
+					</td>
+					<td>
+						<a href="{{ url_for('patrons') }}">
+							<input type="button" value="Cancel" title="Cancel Edit"/>
+						</a>
+					</td>
+				</tr>
+			</fieldset>
+		</form>
+		{% endfor %}
+	</tbody>
+</table>
+
+{% endblock %}

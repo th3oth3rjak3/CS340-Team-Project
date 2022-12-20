@@ -1,0 +1,126 @@
+<!--extend base template, create title, create content to put in base-->
+{% extends 'base.j2' %}
+{% block title %} Edit Supplier {% endblock %}
+{% block content %}
+
+<script type="application/javascript">
+	// Validate supplier edit is not empty/null
+	function validate_edit() {
+		let supplier_name = document.getElementById('edit_supplier_name');
+		let phone_number = document.getElementById(
+			'edit_supplier_phone_number'
+		);
+		let supplier_address = document.getElementById('edit_supplier_address');
+		// if supplier name is empty/null make user enter a name
+		if (supplier_name.value === '') {
+			window.alert('Please enter the supplier Name.');
+			name.focus();
+			return false;
+		}
+
+		let regex_pattern = /^\({1}[0-9]{3}\)\s[0-9]{3}[-]{1}[0-9]{4}$/;
+		// if phone number is not valid or empty make user enter a number
+		if (
+			phone_number.value === '' ||
+			String(phone_number.value.match(regex_pattern)) !==
+				phone_number.value
+		) {
+			window.alert('Please enter a valid Phone Number.');
+			phone_number.focus();
+			return false;
+		}
+		// if supplier address is empty/null make user enter an address
+		if (supplier_address.value === '') {
+			window.alert('Please enter an Address.');
+			address.focus();
+			return false;
+		}
+		// if form is valid, submit
+		document.forms['edit_supplier'].submit();
+	}
+</script>
+
+<caption>
+	Edit Supplier
+</caption>
+<table>
+	<thead>
+		<tr>
+		<!--loop through headers and place into table row-->
+			{% for dict in headers %} 
+        	{% for key in dict.keys() %}
+			<th>{{ key }}</th>
+			{% endfor %}
+      		{% endfor %}
+			<th>Save</th>
+			<th>Cancel</th>
+		</tr>
+	</thead>
+	<tbody>
+	<!--put supplier data into fields and create fields-->
+		{% for result in supplier %}
+		<form
+			name="edit_supplier"
+			action="{{ url_for('edit_supplier', edit_id=result['Supplier ID']) }}"
+			method="POST"
+		>
+			<fieldset>
+				<tr>
+					<td>
+						<input
+							type="text"
+							readonly="readonly"
+							id="edit_supplier_id"
+							name="edit_supplier_id"
+							title="Supplier ID (Read Only)"
+							value="{{ result['Supplier ID'] }}"
+						/>
+					</td>
+					<td>
+						<input
+							type="text"
+							id="edit_supplier_name"
+							name="edit_supplier_name"
+							title="Enter Supplier Name"
+							value="{{ result['Name'] }}"
+						/>
+					</td>
+                    <td>
+						<input
+							type="text"
+							id="edit_supplier_address"
+							name="edit_supplier_address"
+							title="Enter Supplier Address"
+							value="{{ result['Address'] }}"
+						/>
+					</td>
+					<td>
+						<input
+							type="text"
+							id="edit_supplier_phone_number"
+							name="edit_supplier_phone_number"
+							pattern="\([0-9]{3}\) [0-9]{3}-[0-9]{4}"
+							title="Enter Supplier Phone Number. Format: (123) 456-7890"
+							value="{{ result['Phone Number'] }}"/>
+					</td>
+					<td>
+						<input
+							type="button"
+							value="Save"
+							onclick="validate_edit()"
+							title="Save Changes"
+						/>
+					</td>
+					<td>
+						<a href="{{ url_for('suppliers') }}">
+							<input type="button" value="Cancel" title="Cancel Edit"/>
+						</a>
+					</td>
+				</tr>
+			</fieldset>
+		</form>
+		{% endfor %}
+	</tbody>
+</table>
+
+{% endblock %}

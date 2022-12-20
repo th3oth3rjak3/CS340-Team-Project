@@ -1,0 +1,161 @@
+<!--extending base template to this one and setting browser tab title-->
+{% extends 'base.j2' %}
+{% block title %} Creators {% endblock %}
+<!--start of content to be placed into the base template-->
+{% block content %}
+
+<script type="application/javascript">
+	// Validate user inputs for the new creator
+	function validate_new_creator() {
+		let full_name = document.getElementById('full_name');
+
+		// if blank, alert the user and focus into the field
+		if (full_name.value === '') {
+			window.alert('Please enter a Name.');
+			full_name.focus();
+			return false;
+		}
+
+		// If valid, submit the form
+		document.forms['new_creator'].submit();
+	}
+</script>
+
+<caption>
+	New Creator
+</caption>
+<table>
+	<thead>
+		<tr>
+			<!-- loop through headers and place them into the new creator table-->
+			{% for dict in headers %}
+			{% for key in dict.keys() %}
+			{% if key != "Creator ID" %}
+			<th>{{ key }}</th>
+			{% endif %}
+			{% endfor %}
+			{% endfor %}
+			<th>Add</th>
+		</tr>
+	</thead>
+	<tbody>
+		<form name="new_creator" action="{{ url_for('new_creator') }}" method="POST">
+			<fieldset>
+				<tr>
+					<td>
+						<input type="text" id="full_name" name="full_name" title="Enter Creator Name"/>
+					</td>
+					<td>
+						<input id="add_creator" name="add_creator" title="Add New Creator" type="button" value="Add"
+							onclick="validate_new_creator()" />
+					</td>
+				</tr>
+			</fieldset>
+		</form>
+	</tbody>
+</table>
+<br />
+<caption>
+	Creator Lookup
+</caption>
+<table>
+	<thead>
+		<tr>
+		<!--put headers into table row except address which isn't a lookup field-->
+			{% for dict in headers %} {% for key in dict.keys() %} {% if key !=
+			"Address" %}
+			<th>{{ key }}</th>
+			{% endif %} {% endfor %} {% endfor %}
+			<th>Search</th>
+		</tr>
+	</thead>
+	<tbody>
+		<form action="{{ url_for('creators') }}" method="POST">
+			<fieldset>
+				<tr>
+				<!-- add a row of search fields and a button to submit-->
+					<td>
+						<input type="text" id="creator_id_lookup" name="creator_id_lookup" title="Enter Creator ID To Search. E.g. %value, value%, %value%"/>
+					</td>
+					<td>
+						<input type="text" id="creator_full_name_lookup" name="creator_full_name_lookup" title="Enter Creator Name To Search. E.g. %value, value%, %value%"/>
+					</td>
+					<td>
+						<input type="button" value="Search" title="Search For Creators" onclick="this.form.submit()" />
+					</td>
+				</tr>
+			</fieldset>
+		</form>
+	</tbody>
+</table>
+<br />
+<caption>
+	Search Results
+</caption>
+<br />
+<table>
+	<thead>
+		<tr>
+		<!-- make a row of headers in the search table-->
+			{% for dict in headers %}
+			{% for key in dict.keys() %}
+			<th>{{ key }}</th>
+			{% endfor %}
+			{% endfor %}
+			<th>Edit</th>
+			<th>Delete</th>
+		</tr>
+	</thead>
+	<tbody>
+		<form>
+			<fieldset>
+			<!--loop through search results and place into table-->
+				{% for result in search_results %}
+				<tr>
+					{% for key, value in result.items() %}
+					<td>{{ value }}</td>
+					{% endfor %}
+					<!--add custom edit button-->
+					<td>
+						<a href="{{ url_for('edit_creator', edit_id=result['Creator ID']) }}">
+							<input id="edit_btn" title="Edit '{{result['Creator']}}'" type="button" value="Edit" />
+						</a>
+					</td>
+
+					<td>
+					<!-- add custom delete button, disable when delete not allowed-->
+						{% if result['Creator ID'] in prevent_delete %}
+							<a href="{{ url_for('delete_creator', delete_id=result['Creator ID']) }}"
+                onclick="">
+								<input id="delete_btn" disabled title="Cannot Delete Creators With Media Items" type="button" value="Delete"
+									 />
+							</a>
+						{% else %}
+							<a href="{{ url_for('delete_creator', delete_id=result['Creator ID']) }}"
+								onclick="return confirm('Delete Creator ID: {{result['Creator ID']}}?')">
+								<input id="delete_btn" title="Delete '{{result['Creator']}}'" type="button" value="Delete"/>
+							</a>
+						{% endif %}
+					</td>
+				</tr>
+				{% endfor %}
+			</fieldset>
+		</form>
+	</tbody>
+</table>
+<!--show flashed message for when no results are found-->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+<br />
+{{ message }}
+<br />
+<!-- return button if no results are found -->
+<a href="{{ url_for('creators') }}">
+    <input id="return_btn" type="button" class="return" value="Return" />
+</a>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+{% endblock %}

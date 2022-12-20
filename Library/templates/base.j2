@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <!--links to our stylesheets and to the select2.css stylesheet-->
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css')  }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='select2.css') }}"/>
+        <!--Allows dynamic titling of the tab in the browser-->
+        <title>{% block title %} {% endblock %} | Local Library</title>
+    </head>
+    <body>
+    <!--scripts for select2 and jquery-->
+    <script src="{{ url_for('static', filename='jquery_1-11-3.js') }}"></script>
+    <script src="{{ url_for('static', filename='select2.js') }}"></script>
+        <!--header for all pages-->
+        <div class="fixed-header">
+            <div class="header-container">
+                Local Library Database Maintenance Application
+            </div>
+            <div class="header-container">
+                <!--Navigation Bar-->
+                <nav>
+                    <a href="{{ url_for('home') }}" title="View The Homepage">Home</a>
+                    <a href="{{ url_for('media_transactions') }}" title="Manage Media Transactions">Media Transactions</a>
+                    <a href="{{ url_for('media_items') }}" title="Manage Media Items">Media Items</a>
+                    <a href="{{ url_for('creators') }}" title="Manage Creators">Creators</a>
+                    <a href="{{ url_for('patrons') }}" title="Manage Patrons">Patrons</a>
+                    <a href="{{ url_for('suppliers') }}" title="Manage Suppliers">Suppliers</a>
+                    <a href="{{ url_for('employees') }}" title="Manage Employees">Employees</a>
+                </nav>
+            </div>
+        </div>
+        <div class="fixed-main">
+            <div class="body-container">
+                <!--Dynamic contents from other pages will be loaded here-->
+                <br>{% block content %} {% endblock %}<br>
+            </div>
+        </div>
+        <!--footer for all pages-->
+        <div class="fixed-footer">
+            <div class="footer-container">
+                Copyright &copy; 2022 Jake Hathaway & Kevin Kraatz
+            </div>
+        </div>
+    </body>
+</html>

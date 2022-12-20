@@ -1,0 +1,251 @@
+<!--extend base template and set browser title-->
+{% extends 'base.j2' %}
+{% block title %} Employees {% endblock %}
+<!--begin content to be placed into template-->
+{% block content %}
+
+<script type="application/javascript">
+	// validate user inputs for creating a new employee
+	function validate_new_employee() {
+		let first_name = document.getElementById('first_name');
+		let last_name = document.getElementById('last_name');
+		let phone_number = document.getElementById('phone_number');
+		let address = document.getElementById('address');
+
+		// if any fields are blank, alert the user and focus into the respective field
+		if (first_name.value === '') {
+			window.alert('Please enter a First Name.');
+			first_name.focus();
+			return false;
+		}
+
+		if (last_name.value === '') {
+			window.alert('Please enter a Last Name.');
+			last_name.focus();
+			return false;
+		}
+
+		let regex_pattern = /^\({1}[0-9]{3}\)\s[0-9]{3}[-]{1}[0-9]{4}$/;
+
+		if (
+			phone_number.value !== '' &&
+			String(phone_number.value.match(regex_pattern)) !==
+				phone_number.value
+		) {
+			window.alert('Please enter a valid Phone Number.');
+			phone_number.focus();
+			return false;
+		}
+
+		if (address.value === '') {
+			window.alert('Please enter an Address.');
+			address.focus();
+			return false;
+		}
+		// if form is valid, submit
+		document.forms['new_employee'].submit();
+	}
+</script>
+
+<caption>
+	New Employee
+</caption>
+<table>
+	<thead>
+		<tr>
+		<!-- loop through headers and place them into the new employee table-->
+			{% for dict in headers %}
+            {% for key in dict.keys() %}
+            {% if key != "Employee ID" %}
+			<th>{{ key }}</th>
+			{% endif %}
+            {% endfor %}
+            {% endfor %}
+			<th>Hire</th>
+		</tr>
+	</thead>
+	<tbody>
+	<!--new employee input form-->
+		<form
+			name="new_employee"
+			action="{{ url_for('new_employee') }}"
+			method="POST"
+		>
+			<fieldset>
+				<tr>
+					<td>
+						<input type="text" id="first_name" name="first_name" title="Enter Employee First Name"/>
+					</td>
+					<td>
+						<input type="text" id="last_name" name="last_name" title="Enter Employee Last Name"/>
+					</td>
+					<td>
+						<input
+							type="text"
+							id="phone_number"
+							name="phone_number"
+							title="Enter Employee Phone Number Or Leave Blank. Format: (123) 456-7890"
+							pattern="\([0-9]{3}\) [0-9]{3}-[0-9]{4}"
+						/>
+					</td>
+					<td>
+						<input type="text" id="address" name="address" title="Enter Employee Address"/>
+					</td>
+					<td>
+						<input
+							id="hire_employee"
+							name="hire_employee"
+							type="button"
+							value="Hire"
+							title="Hire New Employee"
+							onclick="validate_new_employee()"
+						/>
+					</td>
+				</tr>
+			</fieldset>
+		</form>
+	</tbody>
+</table>
+<br />
+<caption>
+	Employee Lookup
+</caption>
+<table>
+	<thead>
+		<tr>
+		<!--put headers into search table row excluding address-->
+			{% for dict in headers %}
+        	{% for key in dict.keys() %}
+            {% if key != "Address" %}
+			<th>{{ key }}</th>
+			{% endif %}
+            {% endfor %}
+            {% endfor %}
+			<th>Search</th>
+		</tr>
+	</thead>
+	<tbody>
+		<form action="{{ url_for('employees') }}" method="POST">
+			<fieldset>
+				<tr>
+				<!-- add a row of search fields and a button to submit-->
+					<td>
+						<input
+							type="text"
+							id="employee_id_lookup"
+							name="employee_id_lookup"
+							title="Enter Employee ID To Search. E.g. %value, value%, %value%"
+						/>
+					</td>
+					<td>
+						<input
+							type="text"
+							id="employee_first_name_lookup"
+							name="employee_first_name_lookup"
+							title="Enter Employee First Name To Search. E.g. %value, value%, %value%"
+						/>
+					</td>
+					<td>
+						<input
+							type="text"
+							id="employee_last_name_lookup"
+							name="employee_last_name_lookup"
+							title="Enter Employee Last Name To Search. E.g. %value, value%, %value%"
+						/>
+					</td>
+					<td>
+						<input
+							type="text"
+							id="employee_phone_number_lookup"
+							name="employee_phone_number_lookup"
+							title="Enter Employee Phone Number To Search. E.g. %value, value%, %value%"
+						/>
+					</td>
+					<td>
+						<input
+							type="button"
+							value="Search"
+							title="Search For Employees"
+							onclick="this.form.submit()"
+						/>
+					</td>
+				</tr>
+			</fieldset>
+		</form>
+	</tbody>
+</table>
+<br />
+<caption>
+	Search Results
+</caption>
+<br />
+<table>
+	<thead>
+		<tr>
+		<!-- make a row of headers in the search results table-->
+			{% for dict in headers %}
+            {% for key in dict.keys() %}
+			<th>{{ key }}</th>
+			{% endfor %}
+            {% endfor %}
+			<th>Edit</th>
+			<th>Fire</th>
+		</tr>
+	</thead>
+	<tbody>
+		<form>
+			<fieldset>
+			<!--loop through search results and place into table-->
+				{% for result in search_results %}
+				<tr>
+					{% for key, value in result.items() %}
+					<td>{{ value }}</td>
+					{% endfor %}
+					<!--add custom edit button-->
+					<td>
+						<a
+							href="{{ url_for('edit_employee', edit_id=result['Employee ID']) }}"
+						>
+							<input id="edit_btn" type="button" value="Edit" title="Edit '{{result['First Name']}} {{result['Last Name']}}'"/>
+						</a>
+					</td>
+					<td>
+					<!-- add custom delete button, disable when delete not allowed-->
+					{% if result['Employee ID'] in prevent_delete %}
+					<a
+						href="{{ url_for('delete_employee', delete_id=result['Employee ID']) }}"
+						onclick=""
+					>
+						<input id="fire_btn" type="button" disabled value="Fire" title="Cannot Delete Employees With Media Transactions"/>
+					</a>
+					{% else %}
+					<a
+						href="{{ url_for('delete_employee', delete_id=result['Employee ID']) }}"
+						onclick="return confirm('Fire {{result['First Name']}} {{result['Last Name']}}?');"
+					>
+						<input id="fire_btn" type="button" value="Fire" title="Fire '{{result['First Name']}} {{result['Last Name']}}'"/>
+					</a>
+					{% endif %}
+					</td>
+				</tr>
+				{% endfor %}
+			</fieldset>
+		</form>
+	</tbody>
+</table>
+<!--show flashed message for when no results are found-->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+<br />
+{{ message }}
+<br />
+<!-- return button if no results are found -->
+<a href="{{ url_for('employees') }}">
+    <input id="return_btn" type="button" class="return" value="Return" />
+</a>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+{% endblock %}
